@@ -1192,6 +1192,50 @@ function populateForm(config) {
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
+// ── Подпись для Telegram ──────────────────────────────────────────────────
+function buildCaption(config) {
+  const items = config.items || [];
+  const snegs     = items.filter(it => it.name.startsWith('Кашалот'));
+  const akbItems  = items.filter(it => it.name.startsWith('АКБ'));
+  const zuItems   = items.filter(it => it.category === 'ЗУ');
+  const hasZap    = items.some(it => it.category === 'запчасти' || it.category === 'доп. запчасти');
+  const hasMod    = items.some(it => it.category === 'модули');
+
+  const snegTypes = [
+    { key: 'региональный', label: 'Кашалот региональный б/у' },
+    { key: 'восстановленный', label: 'Кашалот восстановленный' },
+    { key: '2026',         label: 'Кашалот новый 2026' },
+    { key: 'NEW',          label: 'Кашалот NEW 2027' },
+  ];
+  const akbTotal = akbItems.reduce((s, it) => s + it.qty, 0);
+  const zuTotal  = zuItems.reduce((s, it) => s + it.qty, 0);
+
+  const snegsTotal = snegs.reduce((s, it) => s + it.qty, 0);
+
+  const lines = ['📦 Лист отгрузки', ''];
+  lines.push(`Партнёр: ${config.partner}`);
+  if (config.location) lines.push(`Город: ${config.location}`);
+  if (config.date)     lines.push(`Дата отправки: ${config.date}`);
+  lines.push('');
+
+  if (snegsTotal > 0) {
+    lines.push(`Всего кашалотов: ${snegsTotal}`);
+    snegTypes.forEach(({key, label}) => {
+      const total = snegs.filter(it => it.name.includes(key)).reduce((s, it) => s + it.qty, 0);
+      if (total > 0) lines.push(`${label}: ${total}`);
+    });
+    lines.push('');
+  }
+
+  if (akbTotal > 0) lines.push(`АКБ: ${akbTotal}`);
+  if (zuTotal  > 0) lines.push(`ЗУ: ${zuTotal}`);
+  lines.push('');
+  lines.push(hasZap ? '+запчасти' : 'нет запчастей');
+  lines.push(hasMod ? '+модули'   : 'нет модулей');
+
+  return lines.join('\n');
+}
+
 // ── Отправить в Telegram ───────────────────────────────────────────────────
 const TG_TOKEN   = '8636095120:AAEbzoNiu5VAFKXHzIYZThmbn-72hRdpFA0';
 const TG_CHAT_ID = '-5442133464';
@@ -1212,7 +1256,7 @@ function sendToTelegram() {
     const form = new FormData();
     form.append('chat_id', TG_CHAT_ID);
     form.append('document', blob, filename);
-    form.append('caption', `📦 Лист отгрузки\nПартнёр: ${config.partner}\nГород: ${config.location||'—'}\nДата отправки: ${config.date||'—'}`);
+    form.append('caption', buildCaption(config));
 
     fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendDocument`, {
       method: 'POST',
