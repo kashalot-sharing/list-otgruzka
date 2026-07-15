@@ -1046,14 +1046,18 @@ function buildDocDef(config) {
         margin:[0,0,0,12],
       },
       {
-        table:{widths:['*','*','*','*','*','*'],body:[[
-          {text:[{text:'Партнёр: ',bold:true}, config.partner]},
-          {text:[{text:'Город / Локация: ',bold:true}, config.location||'—']},
-          {text:[{text:'Телефон / TG получателя: ',bold:true}, config.contact_name||'—']},
-          {text:[{text:'Способ отправки: ',bold:true}, config.shipping||'—']},
-          {text:[{text:'Доставка за счёт: ',bold:true}, config.delivery_payer||'—']},
-          {text:[{text:'Тип сделки: ',bold:true}, config.deal_type||'—']},
-        ]]},
+        table:{widths:['*','*','*'],body:[
+          [
+            {text:[{text:'Партнёр: ',bold:true}, config.partner]},
+            {text:[{text:'Город / Локация: ',bold:true}, config.location||'—']},
+            {text:[{text:'Тип сделки: ',bold:true}, config.deal_type||'—']},
+          ],
+          [
+            {text:[{text:'Телефон / TG: ',bold:true}, config.contact_name||'—']},
+            {text:[{text:'Способ отправки: ',bold:true}, config.shipping||'—']},
+            {text:[{text:'Доставка за счёт: ',bold:true}, config.delivery_payer||'—']},
+          ],
+        ]},
         layout:{fillColor:()=>PB,
           hLineWidth:(i)=>i===0?2:0,vLineWidth:()=>0,hLineColor:()=>MB,
           paddingLeft:()=>8,paddingRight:()=>8,paddingTop:()=>7,paddingBottom:()=>7},
@@ -1080,7 +1084,7 @@ function buildDocDef(config) {
       {
         table:{widths:['*',155],body:[[
           {text:'Составитель:', bold:true,fontSize:10,color:DB,alignment:'right'},
-          {text:`${config.compiler_name||'—'}  ${config.compiler_date||''}`, fontSize:10,color:DB,alignment:'center'},
+          {stack:[{text:config.compiler_name||'—', fontSize:10, color:DB, bold:true},{text:config.compiler_date||'', fontSize:10, color:DB}], alignment:'center'},
         ]]},
         layout:{fillColor:()=>PB,
           hLineWidth:(i)=>i===0?1:0,vLineWidth:()=>0,hLineColor:()=>MB,
